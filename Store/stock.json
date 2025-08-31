@@ -4,12 +4,13 @@
     { "name": "Leopard", "inStock": true }
   ],
   "Grow A Garden": [
-    { "name": "T-Rex", "inStock": true }
+    { "name": "T-Rex", "inStock": false }
   ],
   "Steal A Brainrot": [
     { "name": "Job Job Job Sahur", "inStock": true },
     { "name": "La Vacca Saturno Saturnita", "inStock": true }
   ]
 }
+
 
 
