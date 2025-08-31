@@ -1,0 +1,13 @@
+{
+  "Blox Fruits": [
+    { "name": "Kitsune", "inStock": true },
+    { "name": "Leopard", "inStock": true }
+  ],
+  "Grow A Garden": [
+    { "name": "T-Rex", "inStock": true }
+  ],
+  "Steal A Brainrot": [
+    { "name": "Job Job Job Sahur", "inStock": true },
+    { "name": "La Vacca Saturno Saturnita", "inStock": true }
+  ]
+}
