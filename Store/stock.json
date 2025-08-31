@@ -1,16 +1,13 @@
 {
   "Blox Fruits": [
-    { "name": "Kitsune", "inStock": true },
-    { "name": "Leopard", "inStock": true }
+    { "name": "Kitsune", "inStock": true, "userId": 12345678 },
+    { "name": "Leopard", "inStock": false, "userId": 87654321 }
   ],
   "Grow A Garden": [
-    { "name": "T-Rex", "inStock": false }
+    { "name": "T-Rex", "inStock": false, "userId": 11223344 }
   ],
   "Steal A Brainrot": [
-    { "name": "Job Job Job Sahur", "inStock": true },
-    { "name": "La Vacca Saturno Saturnita", "inStock": true }
+    { "name": "Job Job Job Sahur", "inStock": true, "userId": 99887766 },
+    { "name": "La Vacca Saturno Saturnita", "inStock": true, "userId": 55443322 }
   ]
 }
-
-
-
