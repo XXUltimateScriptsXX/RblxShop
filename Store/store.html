@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nova Store</title>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  text-align: center;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+h1, h2 { margin-bottom: 20px; }
+.hidden { display: none; }
+.panel {
+  background: rgba(0,0,0,0.6);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  max-width: 500px;
+  width: 90%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateX(100%);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+.panel.active {
+  transform: translate(-50%, -50%) translateX(0);
+  opacity: 1;
+}
+.panel.exit-left {
+  transform: translate(-50%, -50%) translateX(-100%);
+  opacity: 0;
+}
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 8px #ffdd55, 0 0 20px #ffdd55, 0 0 30px #ffdd55; }
+  50% { text-shadow: 0 0 12px #ffdd55, 0 0 28px #ffdd55, 0 0 40px #ffdd55; }
+  100% { text-shadow: 0 0 8px #ffdd55, 0 0 20px #ffdd55, 0 0 30px #ffdd55; }
+}
+#storeTitle { font-size: 36px; color: #ffdd55; animation: glowPulse 2s infinite alternate; }
+#storeSubtitle { font-size: 20px; color: #ffdd55; animation: glowPulse 2s infinite alternate; margin-bottom: 25px; }
+button {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+  color: white;
+  border: none;
+  padding: 16px 28px;
+  margin: 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+button:hover {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+input {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  width: 80%;
+  margin: 10px 0;
+  font-size: 16px;
+  text-align: center;
+}
+#confirmHeadshot {
+  display:none;
+  border-radius:50%;
+  margin:15px 0;
+  width:100px;
+  height:100px;
+}
+</style>
+</head>
+<body>
+
+<!-- Step 1: Category Selection -->
+<div id="categoryPage" class="panel active">
+  <h1 id="storeTitle">Nova Store</h1>
+  <p id="storeSubtitle">Shop Like A God</p>
+  <h2>Select a Category</h2>
+  <button onclick="showProducts('Blox Fruits')">🍍 Blox Fruits</button>
+  <button onclick="showProducts('Grow A Garden')">🌱 Grow A Garden</button>
+  <button onclick="showProducts('Steal A Brainrot')">🧠 Steal A Brainrot</button>
+</div>
+
+<!-- Step 2: Product Selection -->
+<div id="productPage" class="hidden panel">
+  <h2>Select a Product</h2>
+  <div id="productButtons"></div>
+  <button onclick="showPage('categoryPage')">⬅ Back to Categories</button>
+</div>
+
+<!-- Step 3: Payment Selection -->
+<div id="paymentPage" class="hidden panel">
+  <h2>Select Payment</h2>
+  <button onclick="selectPayment('Grow A Garden')">🌱 Grow A Garden</button>
+  <button onclick="selectPayment('Steal A Brainrot')">🧠 Steal A Brainrot</button>
+  <button onclick="selectPayment('Blox Fruits')">🍍 Blox Fruits</button>
+  <br><button onclick="showPage('productPage')">⬅ Back to Products</button>
+</div>
+
+<!-- Step 4: Enter Roblox and Discord Username -->
+<div id="usernamePage" class="hidden panel">
+  <h2>Enter Your Usernames</h2>
+  <input type="text" id="robloxInput" placeholder="Roblox Username"><br>
+  <input type="text" id="discordInput" placeholder="Discord Username"><br>
+  <button onclick="confirmUsername()">Continue</button>
+</div>
+
+<!-- Step 5: Confirmation -->
+<div id="confirmPage" class="hidden panel">
+  <h2>⚠ HOLD ON! Are you sure this is you?</h2>
+  <img id="confirmHeadshot" src="" alt="Roblox Headshot">
+  <p><b>Roblox Username:</b> <span id="confirmUsernameText"></span></p>
+  <p><b>Discord Username:</b> <span id="confirmDiscordText"></span></p>
+  <p><b>Product:</b> <span id="confirmProduct"></span></p>
+  <p><b>Payment:</b> <span id="confirmPayment"></span></p>
+  <button onclick="sendData()">✅ Yes</button>
+  <button onclick="showPage('usernamePage')">❌ No</button>
+</div>
+
+<!-- Step 6: Done -->
+<div id="donePage" class="hidden panel">
+  <h2>✅ Submitted!</h2>
+  <p>We got your offer. Thanks for using the store!</p>
+  <p style="margin-top:15px; font-weight:bold;">
+    Message/DM @BlazzzzeyyYT on Discord. He is our selected bot for this purchase.<br>
+    (or ping him in Painful Beaming when he's online)
+  </p>
+  <button onclick="showPage('categoryPage')">Back To Home</button>
+</div>
+
+<script>
+let selectedCategory = "";
+let selectedProduct = "";
+let selectedPayment = "";
+let username = "";
+let discordUsername = "";
+
+const products = {
+  "Blox Fruits": [
+    { name: "Kitsune", inStock: true },
+    { name: "Leopard", inStock: true }
+  ],
+  "Grow A Garden": [
+    { name: "T-Rex", inStock: false } // Out of stock example
+  ],
+  "Steal A Brainrot": [
+    { name: "Job Job Job Sahur", inStock: true },
+    { name: "La Vacca Saturno Saturnita", inStock: true }
+  ]
+};
+
+function showProducts(category) {
+  selectedCategory = category;
+  const container = document.getElementById('productButtons');
+  container.innerHTML = "";
+  products[category].forEach(p => {
+    const btn = document.createElement('button');
+    btn.textContent = p.name + (p.inStock ? "" : " ❌ Out of Stock");
+    btn.disabled = !p.inStock;
+    btn.onclick = () => {
+      if(p.inStock) {
+        selectedProduct = p.name;
+        showPage('paymentPage');
+      }
+    };
+    container.appendChild(btn);
+  });
+  showPage('productPage');
+}
+
+function selectPayment(payment) {
+  selectedPayment = payment;
+  showPage('usernamePage');
+}
+
+async function confirmUsername() {
+  const roblox = document.getElementById("robloxInput").value.trim();
+  const discord = document.getElementById("discordInput").value.trim();
+  if (!roblox || !discord) { alert("Please enter both Roblox and Discord usernames."); return; }
+
+  username = roblox;
+  discordUsername = discord;
+
+  document.getElementById("confirmUsernameText").innerText = username;
+  document.getElementById("confirmDiscordText").innerText = discordUsername;
+  document.getElementById("confirmProduct").innerText = selectedProduct;
+  document.getElementById("confirmPayment").innerText = selectedPayment;
+
+  // Roblox headshot fetch with CORS proxy
+  try {
+    const proxy = "https://corsproxy.io/?";
+    const response = await fetch(proxy + `https://users.roblox.com/v1/users/search?keyword=${username}`);
+    const data = await response.json();
+    
+    if (data.data && data.data.length > 0) {
+      const userId = data.data[0].id;
+      const headshotImg = document.getElementById("confirmHeadshot");
+      headshotImg.src = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
+      headshotImg.style.display = "block";
+    } else {
+      console.log("User not found");
+    }
+  } catch(err) {
+    console.log("Could not fetch Roblox headshot:", err);
+  }
+
+  showPage("confirmPage");
+}
+
+async function sendData() {
+  const webhookURL = "https://discord.com/api/webhooks/1411440114650841249/NMooKTJ4ByM3kOk1qLPQZADQ4wCe5VocLC1kBBPxRtQQH37d6LA-XKHT0PXWXT9eWkjs";
+  const payload = {
+    username: "Nova Store Bot",
+    avatar_url: "https://share.creavite.co/68b3f4bbda4ebfbf23bd165f.png",
+    content: "@everyone New store request!",
+    embeds: [{
+      title: "🛒 New Store Request",
+      color: 0x00ffcc,
+      fields: [
+        { name: "Product", value: selectedProduct, inline: true },
+        { name: "Payment", value: selectedPayment, inline: true },
+        { name: "Roblox Username", value: username, inline: false },
+        { name: "Discord Username", value: discordUsername, inline: false }
+      ],
+      footer: { text: "Roblox Store System" }
+    }]
+  };
+  await fetch(webhookURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  showPage("donePage");
+}
+
+function showPage(pageId) {
+  const pages = ["categoryPage","productPage","paymentPage","usernamePage","confirmPage","donePage"];
+  pages.forEach(p => {
+    const el = document.getElementById(p);
+    if (el.classList.contains("active")) {
+      el.classList.remove("active");
+      el.classList.add("exit-left");
+      setTimeout(() => el.classList.add("hidden"), 400);
+    } else {
+      el.classList.add("hidden");
+      el.classList.remove("exit-left");
+    }
+  });
+  const next = document.getElementById(pageId);
+  next.classList.remove("hidden");
+  setTimeout(() => next.classList.add("active"), 10);
+}
+</script>
+</body>
+</html>
