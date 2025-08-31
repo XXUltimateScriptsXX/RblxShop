@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Rblx Shop</title>
+<title>Rblx Store</title>
 <style>
 body {
   margin: 0;
@@ -92,7 +92,7 @@ input {
 
 <!-- Step 1: Category Selection -->
 <div id="categoryPage" class="panel active">
-  <h1 id="storeTitle">Rblx Store</h1>
+  <h1 id="storeTitle">Rblx Shop</h1>
   <p id="storeSubtitle">Shop Like A God</p>
   <h2>Select a Category</h2>
   <button onclick="showProducts('Blox Fruits')">🍍 Blox Fruits</button>
@@ -148,30 +148,32 @@ input {
 </div>
 
 <script>
+let products = {};
 let selectedCategory = "";
 let selectedProduct = "";
 let selectedPayment = "";
 let username = "";
 let discordUsername = "";
 
-const products = {
-  "Blox Fruits": [
-    { name: "Kitsune", inStock: true },
-    { name: "Leopard", inStock: true }
-  ],
-  "Grow A Garden": [
-    { name: "T-Rex", inStock: false } // Out of stock example
-  ],
-  "Steal A Brainrot": [
-    { name: "Job Job Job Sahur", inStock: true },
-    { name: "La Vacca Saturno Saturnita", inStock: true }
-  ]
-};
+// Load product stock dynamically
+async function loadProducts() {
+  try {
+    const response = await fetch("stock.json");
+    products = await response.json();
+  } catch(err) {
+    console.error("Failed to load products:", err);
+  }
+}
+
+loadProducts();
 
 function showProducts(category) {
   selectedCategory = category;
   const container = document.getElementById('productButtons');
   container.innerHTML = "";
+
+  if (!products[category]) return;
+
   products[category].forEach(p => {
     const btn = document.createElement('button');
     btn.textContent = p.name + (p.inStock ? "" : " ❌ Out of Stock");
@@ -272,6 +274,3 @@ function showPage(pageId) {
 </script>
 </body>
 </html>
-
-
-
