@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rblx Store</title>
 <style>
 body {
@@ -12,7 +13,7 @@ body {
   color: white;
   text-align: center;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
   position: relative;
 }
 h1, h2 { margin-bottom: 20px; }
@@ -86,6 +87,10 @@ input {
   width:100px;
   height:100px;
 }
+@media (max-width: 500px) {
+  .panel { width: 95%; padding: 20px; }
+  button { padding: 14px 20px; font-size: 16px; margin: 8px; }
+}
 </style>
 </head>
 <body>
@@ -148,32 +153,41 @@ input {
 </div>
 
 <script>
-let products = {};
+// ==========================
+// Product Data
+// ==========================
+let products = {
+  "Blox Fruits": [
+    { name: "Kitsune", inStock: true },
+    { name: "Leopard", inStock: true }
+  ],
+  "Grow A Garden": [
+    { name: "T-Rex", inStock: false }
+  ],
+  "Steal A Brainrot": [
+    { name: "Job Job Job Sahur", inStock: true },
+    { name: "La Vacca Saturno Saturnita", inStock: true }
+  ]
+};
+
+// ==========================
+// State Variables
+// ==========================
 let selectedCategory = "";
 let selectedProduct = "";
 let selectedPayment = "";
 let username = "";
 let discordUsername = "";
 
-// Load product stock dynamically
-async function loadProducts() {
-  try {
-    const response = await fetch("stock.json");
-    products = await response.json();
-  } catch(err) {
-    console.error("Failed to load products:", err);
-  }
-}
-
-loadProducts();
-
+// ==========================
+// Show Products Page
+// ==========================
 function showProducts(category) {
   selectedCategory = category;
   const container = document.getElementById('productButtons');
   container.innerHTML = "";
 
-  if (!products[category]) return;
-
+  // Create simple buttons for each product
   products[category].forEach(p => {
     const btn = document.createElement('button');
     btn.textContent = p.name + (p.inStock ? "" : " ❌ Out of Stock");
@@ -186,53 +200,75 @@ function showProducts(category) {
     };
     container.appendChild(btn);
   });
+
   showPage('productPage');
 }
 
+// ==========================
+// Select Payment
+// ==========================
 function selectPayment(payment) {
   selectedPayment = payment;
   showPage('usernamePage');
 }
 
+// ==========================
+// Confirm Username
+// ==========================
 async function confirmUsername() {
   const roblox = document.getElementById("robloxInput").value.trim();
   const discord = document.getElementById("discordInput").value.trim();
-  if (!roblox || !discord) { alert("Please enter both Roblox and Discord usernames."); return; }
+  if (!roblox || !discord) { 
+    alert("Please enter both Roblox and Discord usernames."); 
+    return; 
+  }
 
   username = roblox;
   discordUsername = discord;
 
+  // Update confirmation page text
   document.getElementById("confirmUsernameText").innerText = username;
   document.getElementById("confirmDiscordText").innerText = discordUsername;
   document.getElementById("confirmProduct").innerText = selectedProduct;
   document.getElementById("confirmPayment").innerText = selectedPayment;
 
-  // Roblox headshot fetch with CORS proxy
   try {
-    const proxy = "https://corsproxy.io/?";
-    const response = await fetch(proxy + `https://users.roblox.com/v1/users/search?keyword=${username}`);
-    const data = await response.json();
-    
+    // Step 1: Get UserId from Username
+    let res = await fetch(`https://users.roblox.com/v1/usernames/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernames: [username] })
+    });
+    let data = await res.json();
+
     if (data.data && data.data.length > 0) {
-      const userId = data.data[0].id;
+      let userId = data.data[0].id;
+      let correctName = data.data[0].name; // Correct casing of username
+
+      document.getElementById("confirmUsernameText").innerText = correctName;
+
+      // Step 2: Show Roblox Headshot
       const headshotImg = document.getElementById("confirmHeadshot");
-      headshotImg.src = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
+      headshotImg.src = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
       headshotImg.style.display = "block";
     } else {
-      console.log("User not found");
+      alert("Roblox username not found!");
     }
-  } catch(err) {
-    console.log("Could not fetch Roblox headshot:", err);
+  } catch (err) {
+    console.error("Error fetching Roblox data:", err);
   }
 
   showPage("confirmPage");
 }
 
+// ==========================
+// Send Data to Discord Webhook
+// ==========================
 async function sendData() {
-  const webhookURL = "https://discord.com/api/webhooks/1411440114650841249/NMooKTJ4ByM3kOk1qLPQZADQ4wCe5VocLC1kBBPxRtQQH37d6LA-XKHT0PXWXT9eWkjs";
+  const webhookURL = "YOUR_WEBHOOK_HERE"; // change this
   const payload = {
     username: "Rblx Shop Bot",
-    avatar_url: "https://share.creavite.co/68b3f4bbda4ebfbf23bd165f.png",
+    avatar_url: "",
     content: "@everyone New store request!",
     embeds: [{
       title: "🛒 New Store Request",
@@ -254,6 +290,9 @@ async function sendData() {
   showPage("donePage");
 }
 
+// ==========================
+// Page Navigation
+// ==========================
 function showPage(pageId) {
   const pages = ["categoryPage","productPage","paymentPage","usernamePage","confirmPage","donePage"];
   pages.forEach(p => {
