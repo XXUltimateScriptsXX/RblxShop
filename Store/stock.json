@@ -1,7 +1,7 @@
 {
   "Blox Fruits": [
     { "name": "Kitsune", "inStock": true },
-    { "name": "Leopard", "inStock": false }
+    { "name": "Leopard", "inStock": true }
   ],
   "Grow A Garden": [
     { "name": "T-Rex", "inStock": true }
@@ -11,4 +11,5 @@
     { "name": "La Vacca Saturno Saturnita", "inStock": true }
   ]
 }
+
 
